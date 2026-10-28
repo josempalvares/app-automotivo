@@ -1,4 +1,3 @@
-flet==0.22.1
-psycopg2-binary==2.9.9
-Pillow==10.3.0
+flet
+psycopg2-binary
 fastapi==0.112.2
