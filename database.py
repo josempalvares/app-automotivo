@@ -1,8 +1,10 @@
+import os
 import psycopg2
 import psycopg2.extras
 
-# A sua Connection String oficial do Neon
-DB_URL = "postgresql://neondb_owner:npg_5JmwMXbUoq6R@ep-twilight-hill-b56yar07-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require"
+# O Render vai tentar buscar a variável "DATABASE_URL" configurada no painel. 
+# Se não a encontrar, usa a sua string oficial do Neon.
+DB_URL = os.getenv("DATABASE_URL", "postgresql://neondb_owner:npg_5JmwMXbUoq6R@ep-twilight-hill-b56yar07-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require")
 
 def get_connection():
     return psycopg2.connect(DB_URL)

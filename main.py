@@ -297,24 +297,14 @@ def main(page: ft.Page):
 
     mostrar_tela("login")
 
-# --- BLOCO SUBSTITUÍDO PARA ATIVAR O PWA (WEB APP) ---
 if __name__ == "__main__":
-    porta_nuvem = int(os.getenv("PORT", 8550))
+    # O Render atribui uma porta dinamicamente. Se estiver a rodar no seu PC, usa a 8000.
+    porta = int(os.environ.get("PORT", 8000))
     
-    # Executa o Flet passando 'main' diretamente
-    if hasattr(ft, "run"):
-        ft.run(
-            main, 
-            view=ft.AppView.WEB_BROWSER, 
-            assets_dir="assets", 
-            port=porta_nuvem, 
-            host="0.0.0.0"
-        )
-    else:
-        ft.app(
-            main, 
-            view=ft.AppView.WEB_BROWSER, 
-            assets_dir="assets", 
-            port=porta_nuvem, 
-            host="0.0.0.0"
-        )
+    ft.app(
+        target=main, 
+        view=ft.AppView.WEB_BROWSER,
+        host="0.0.0.0",
+        port=porta,
+        assets_dir="assets"
+    )
