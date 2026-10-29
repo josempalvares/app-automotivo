@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import flet as ft
 import urllib.parse
 import urllib.request
@@ -54,7 +57,6 @@ def carregar_logo_base64():
             return f"data:image/svg+xml;base64,{b64}"
         except Exception:
             pass
-
     for nome_png in ["logo_transparente.png", "logo_180.png", "favicon.png"]:
         caminho_png = os.path.join("assets", nome_png)
         if os.path.exists(caminho_png):
@@ -67,49 +69,54 @@ def carregar_logo_base64():
     return "favicon.png"
 
 # =========================================================================
-# BASE NACIONAL DE CONCESSIONÁRIAS DE RODOVIAS (0800 EMERGÊNCIA 24H)
+# BASE NACIONAL DE CONCESSIONÁRIAS (0800 EMERGÊNCIA 24H)
 # =========================================================================
 CONCESSIONARIAS_BRASIL = [
-    # MINAS GERAIS E EIXOS PRINCIPAIS
     {"nome": "Arteris Fernão Dias", "rodovia": "BR-381 (BH / São Paulo)", "uf": "MG/SP", "fone": "0800 283 0381"},
     {"nome": "EPR Via Mineira", "rodovia": "BR-040 (BH / Juiz de Fora)", "uf": "MG", "fone": "0800 003 1040"},
     {"nome": "Via Cristais (BR-040)", "rodovia": "BR-040 (BH / Cristalina-GO)", "uf": "MG/GO", "fone": "0800 040 0040"},
-    {"nome": "Nova 381", "rodovia": "BR-381 (BH / Governador Valadares)", "uf": "MG", "fone": "0800 038 1381"},
-    {"nome": "Way-262 / Concebra", "rodovia": "BR-262 e BR-153 (Triângulo/Central)", "uf": "MG/GO", "fone": "0800 060 6000"},
-    {"nome": "Eco135", "rodovia": "BR-135, MG-231 e LMG-754 (Norte MG)", "uf": "MG", "fone": "0800 013 5135"},
-    {"nome": "Eco050", "rodovia": "BR-050 (Triângulo Mineiro / GO)", "uf": "MG/GO", "fone": "0800 940 0700"},
-    {"nome": "EPR Sul de Minas", "rodovia": "MG-290, MG-455, MG-173, BR-459", "uf": "MG", "fone": "0800 290 0400"},
-    {"nome": "EPR Triângulo", "rodovia": "BR-452,BR-365, MG-190, MG-427", "uf": "MG", "fone": "0800 452 0365"},
-    {"nome": "EPR Vias do Café", "rodovia": "BR-146, BR-265, MG-167 (Sul MG)", "uf": "MG", "fone": "0800 265 0491"},
-    {"nome": "Via Nascentes", "rodovia": "MG-050, BR-265, BR-491 (Centro-Oeste)", "uf": "MG", "fone": "0800 282 0505"},
-    {"nome": "EcoRioMinas", "rodovia": "BR-116, BR-465 e BR-493 (MG / RJ)", "uf": "MG/RJ", "fone": "0800 116 0493"},
-    # SÃO PAULO E RIO DE JANEIRO
+    {"nome": "Nova 381", "rodovia": "BR-381 (BH / Gov. Valadares)", "uf": "MG", "fone": "0800 038 1381"},
+    {"nome": "Way-262 / Concebra", "rodovia": "BR-262 e BR-153", "uf": "MG/GO", "fone": "0800 060 6000"},
+    {"nome": "Eco135", "rodovia": "BR-135, MG-231 e LMG-754", "uf": "MG", "fone": "0800 013 5135"},
+    {"nome": "Eco050", "rodovia": "BR-050 (Triângulo / GO)", "uf": "MG/GO", "fone": "0800 940 0700"},
+    {"nome": "EPR Sul de Minas", "rodovia": "MG-290, BR-459 (Sul MG)", "uf": "MG", "fone": "0800 290 0400"},
+    {"nome": "EPR Triângulo", "rodovia": "BR-452, BR-365, MG-190", "uf": "MG", "fone": "0800 452 0365"},
+    {"nome": "EPR Vias do Café", "rodovia": "BR-146, BR-265, MG-167", "uf": "MG", "fone": "0800 265 0491"},
+    {"nome": "Via Nascentes", "rodovia": "MG-050, BR-265, BR-491", "uf": "MG", "fone": "0800 282 0505"},
+    {"nome": "EcoRioMinas", "rodovia": "BR-116, BR-465 e BR-493", "uf": "MG/RJ", "fone": "0800 116 0493"},
     {"nome": "CCR RioSP (Via Dutra)", "rodovia": "BR-116 e BR-101 (SP / RJ)", "uf": "SP/RJ", "fone": "0800 017 3536"},
-    {"nome": "Concer", "rodovia": "BR-040 (Juiz de Fora / Rio de Janeiro)", "uf": "MG/RJ", "fone": "0800 282 0040"},
-    {"nome": "Ecovias (Imigrantes/Anchieta)", "rodovia": "SP-150 e SP-160 (Capital / Litoral)", "uf": "SP", "fone": "0800 019 7878"},
-    {"nome": "CCR AutoBAn", "rodovia": "Anhanguera e Bandeirantes (SP-330/348)", "uf": "SP", "fone": "0800 055 5550"},
-    {"nome": "CCR ViaOeste / SPVias", "rodovia": "Castelo Branco e Raposo Tavares", "uf": "SP", "fone": "0800 701 5555"},
-    {"nome": "Arteris Régis Bittencourt", "rodovia": "BR-116 (São Paulo / Curitiba)", "uf": "SP/PR", "fone": "0800 709 0116"},
-    {"nome": "Arteris Intervias / ViaPaulista", "rodovia": "SP-330, SP-255, SP-147 (Interior SP)", "uf": "SP", "fone": "0800 001 1255"},
-    {"nome": "Ecopistas", "rodovia": "Ayrton Senna e Carvalho Pinto (SP-070)", "uf": "SP", "fone": "0800 777 0070"},
-    {"nome": "Rota das Bandeiras", "rodovia": "Corredor Dom Pedro (SP-065 / SP-332)", "uf": "SP", "fone": "0800 770 8070"},
-    {"nome": "Arteris Fluminense", "rodovia": "BR-101 (Niterói / Divisa ES)", "uf": "RJ", "fone": "0800 282 0101"},
-    {"nome": "Ecoponte", "rodovia": "Ponte Rio-Niterói (BR-101)", "uf": "RJ", "fone": "0800 777 6683"},
-    # SUL (PR, SC, RS)
-    {"nome": "Arteris Litoral Sul", "rodovia": "BR-116 e BR-101 (Curitiba / Florianópolis)", "uf": "PR/SC", "fone": "0800 725 1771"},
-    {"nome": "Arteris Planalto Sul", "rodovia": "BR-116 (Curitiba / Divisa SC-RS)", "uf": "PR/SC", "fone": "0800 717 1000"},
-    {"nome": "CCR ViaSul", "rodovia": "BR-101, BR-290 (Freeway) e BR-386", "uf": "RS/SC", "fone": "0800 000 0290"},
-    {"nome": "CCR ViaCosteira", "rodovia": "BR-101 Sul de Santa Catarina", "uf": "SC", "fone": "0800 255 5550"},
-    {"nome": "Via Araucária / EPR Litoral Pioneiro", "rodovia": "BR-277, BR-376 e PR-151 (Paraná)", "uf": "PR", "fone": "0800 277 0376"},
-    {"nome": "Ecosul", "rodovia": "BR-116 e BR-392 (Pelotas / Rio Grande)", "uf": "RS", "fone": "0800 724 1066"},
-    # CENTRO-OESTE, NORDESTE E NORTE
-    {"nome": "Eco101", "rodovia": "BR-101 (Espírito Santo / Sul da Bahia)", "uf": "ES/BA", "fone": "0800 770 1101"},
-    {"nome": "ViaBahia", "rodovia": "BR-324 e BR-116 (Salvador / Feira / Vitória da Conquista)", "uf": "BA", "fone": "0800 600 0324"},
-    {"nome": "Ecovias do Araguaia", "rodovia": "BR-153, BR-414 e BR-080 (GO / TO)", "uf": "GO/TO", "fone": "0800 153 0153"},
+    {"nome": "Concer", "rodovia": "BR-040 (Juiz de Fora / RJ)", "uf": "MG/RJ", "fone": "0800 282 0040"},
+    {"nome": "Ecovias (Imigrantes/Anchieta)", "rodovia": "SP-150 e SP-160", "uf": "SP", "fone": "0800 019 7878"},
+    {"nome": "CCR AutoBAn", "rodovia": "Anhanguera e Bandeirantes", "uf": "SP", "fone": "0800 055 5550"},
+    {"nome": "CCR ViaOeste / SPVias", "rodovia": "Castelo Branco e Raposo", "uf": "SP", "fone": "0800 701 5555"},
+    {"nome": "Arteris Régis Bittencourt", "rodovia": "BR-116 (SP / Curitiba)", "uf": "SP/PR", "fone": "0800 709 0116"},
+    {"nome": "Ecopistas", "rodovia": "Ayrton Senna/Carvalho Pinto", "uf": "SP", "fone": "0800 777 0070"},
+    {"nome": "Rota das Bandeiras", "rodovia": "Corredor Dom Pedro (SP-065)", "uf": "SP", "fone": "0800 770 8070"},
+    {"nome": "Arteris Fluminense", "rodovia": "BR-101 (Niterói / ES)", "uf": "RJ", "fone": "0800 282 0101"},
+    {"nome": "Arteris Litoral Sul", "rodovia": "BR-116/101 (Curitiba / SC)", "uf": "PR/SC", "fone": "0800 725 1771"},
+    {"nome": "Arteris Planalto Sul", "rodovia": "BR-116 (PR / SC / RS)", "uf": "PR/SC", "fone": "0800 717 1000"},
+    {"nome": "CCR ViaSul", "rodovia": "BR-101, BR-290 e BR-386", "uf": "RS/SC", "fone": "0800 000 0290"},
+    {"nome": "Eco101", "rodovia": "BR-101 (ES / Sul da Bahia)", "uf": "ES/BA", "fone": "0800 770 1101"},
+    {"nome": "ViaBahia", "rodovia": "BR-324 e BR-116 (Bahia)", "uf": "BA", "fone": "0800 600 0324"},
+    {"nome": "Ecovias do Araguaia", "rodovia": "BR-153, BR-414 e BR-080", "uf": "GO/TO", "fone": "0800 153 0153"},
     {"nome": "CCR MSVia", "rodovia": "BR-163 (Mato Grosso do Sul)", "uf": "MS", "fone": "0800 648 0163"},
-    {"nome": "Nova Rota do Oeste", "rodovia": "BR-163 e BR-364 (Mato Grosso)", "uf": "MT", "fone": "0800 065 0163"},
-    {"nome": "Via Brasil BR-163", "rodovia": "BR-163 e BR-230 (MT / Pará)", "uf": "MT/PA", "fone": "0800 500 0163"},
+    {"nome": "Nova Rota do Oeste", "rodovia": "BR-163 e BR-364 (MT)", "uf": "MT", "fone": "0800 065 0163"},
 ]
+
+
+def criar_borda_input(cor_normal="#94A3B8", cor_foco="#0066FF", raio=12):
+    """Cria borda compatível tanto com Flet 1.0+ (side=) quanto versões anteriores."""
+    try:
+        b_normal = ft.OutlineInputBorder(border_radius=raio, side=ft.BorderSide(1, cor_normal))
+        b_foco = ft.OutlineInputBorder(border_radius=raio, side=ft.BorderSide(2, cor_foco))
+        if hasattr(ft, "ControlState"):
+            return {
+                ft.ControlState.DEFAULT: b_normal,
+                ft.ControlState.FOCUSED: b_foco,
+            }
+        return b_normal
+    except Exception:
+        return None
 
 
 def main(page: ft.Page):
@@ -127,16 +134,18 @@ def main(page: ft.Page):
 
     logo_src = carregar_logo_base64()
 
-    def discar_emergencia(numero):
-        numero_limpo = re.sub(r"[^0-9]", "", str(numero))
-        url_tel = f"tel:{numero_limpo}"
+    def abrir_link(url_alvo):
         try:
-            page.launch_url(url_tel)
+            page.launch_url(url_alvo)
         except Exception:
             try:
-                webbrowser.open(url_tel)
+                webbrowser.open(url_alvo)
             except Exception:
                 pass
+
+    def discar_emergencia(numero):
+        numero_limpo = re.sub(r"[^0-9]", "", str(numero))
+        abrir_link(f"tel:{numero_limpo}")
 
     def criar_moldura_mobile(conteudo_principal, barra_inferior=None):
         coluna_interna = [ft.Container(content=conteudo_principal, expand=True)]
@@ -160,18 +169,20 @@ def main(page: ft.Page):
         )
 
     def criar_input(label_texto, icone=None, senha=False):
-        return ft.TextField(
+        borda = criar_borda_input("#94A3B8", "#0066FF", 12)
+        kwargs = dict(
             label=label_texto,
             password=senha,
             prefix_icon=icone,
             bgcolor="#FFFFFF",
             filled=True,
-            border_radius=12,
-            border_color="#94A3B8",
-            focused_border_color="#0066FF",
             content_padding=ft.Padding(left=14, right=14, top=14, bottom=14),
-            text_size=14
+            text_size=14,
+            expand=True
         )
+        if borda is not None:
+            kwargs["border"] = borda
+        return ft.TextField(**kwargs)
 
     def criar_botao(texto, acao_clique, cor_fundo="#0066FF", cor_texto="white", altura=48, expandir=False):
         return ft.Container(
@@ -221,7 +232,7 @@ def main(page: ft.Page):
         page.clean()
 
         # =====================================================================
-        # TELA DE LOGIN (COM ACESSO RÁPIDO AO SOS MESMO SEM LOGIN)
+        # TELA DE LOGIN (SIMÉTRICA, COMPACTA E COM SOS VISÍVEL SEM ROLAGEM)
         # =====================================================================
         if nome_tela == "login":
             txt_telefone = criar_input("Telefone Cadastrado", icone=ft.Icons.PHONE)
@@ -229,71 +240,112 @@ def main(page: ft.Page):
             lbl_erro = ft.Text("", color="#DC2626", weight="w600", size=13, text_align="center")
 
             def btn_login_click(e):
-                conn = db.get_connection()
-                cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-                cursor.execute("SELECT id, nome, tipo_perfil FROM usuarios WHERE telefone = %s AND senha_hash = %s", (txt_telefone.value, txt_senha.value))
-                user = cursor.fetchone()
-                conn.close()
-                
-                if user:
-                    user_dict = dict(user)
-                    if user_dict['tipo_perfil'] == 'admin': mostrar_tela("admin")
-                    elif user_dict['tipo_perfil'] == 'cliente': mostrar_tela("cliente_home", user_dict)
-                    elif user_dict['tipo_perfil'] == 'prestador': mostrar_tela("prestador_home", user_dict)
-                else:
-                    lbl_erro.value = "Telefone ou senha incorretos."
+                tel_digitado = (txt_telefone.value or "").strip()
+                senha_digitada = (txt_senha.value or "").strip()
+
+                if not tel_digitado or not senha_digitada:
+                    lbl_erro.value = "Preencha o telefone e a senha."
+                    lbl_erro.color = "#DC2626"
+                    page.update()
+                    return
+
+                lbl_erro.value = "Verificando acesso..."
+                lbl_erro.color = "#0066FF"
+                page.update()
+
+                try:
+                    conn = db.get_connection()
+                    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                    cursor.execute(
+                        "SELECT id, nome, tipo_perfil FROM usuarios WHERE TRIM(telefone) = %s AND TRIM(senha_hash) = %s",
+                        (tel_digitado, senha_digitada)
+                    )
+                    user = cursor.fetchone()
+
+                    # Caso tenha digitado com ou sem zero à esquerda (ex: 031 vs 31)
+                    if not user and tel_digitado.startswith("0"):
+                        cursor.execute(
+                            "SELECT id, nome, tipo_perfil FROM usuarios WHERE TRIM(telefone) = %s AND TRIM(senha_hash) = %s",
+                            (tel_digitado.lstrip("0"), senha_digitada)
+                        )
+                        user = cursor.fetchone()
+
+                    conn.close()
+                    
+                    if user:
+                        user_dict = dict(user)
+                        perfil = str(user_dict.get('tipo_perfil', 'cliente')).strip().lower()
+                        if perfil == 'admin':
+                            mostrar_tela("admin")
+                        elif perfil == 'prestador':
+                            mostrar_tela("prestador_home", user_dict)
+                        else:
+                            mostrar_tela("cliente_home", user_dict)
+                    else:
+                        lbl_erro.value = "Telefone ou senha incorretos."
+                        lbl_erro.color = "#DC2626"
+                        page.update()
+                except Exception as ex:
+                    lbl_erro.value = f"Falha na conexão: {str(ex)[:60]}"
+                    lbl_erro.color = "#DC2626"
                     page.update()
 
             conteudo = ft.Container(
                 bgcolor="#FFFFFF",
                 expand=True,
-                padding=ft.Padding(left=24, right=24, top=32, bottom=20),
+                padding=ft.Padding(left=22, right=22, top=28, bottom=16),
                 content=ft.Column(
                     scroll="auto",
                     horizontal_alignment="center",
+                    spacing=0,
                     controls=[
+                        ft.Container(height=6),
                         ft.Container(
                             alignment=ft.Alignment(0, 0),
-                            content=ft.Image(src=logo_src, width=110, height=110, fit="contain")
+                            content=ft.Image(src=logo_src, width=92, height=92, fit="contain")
                         ),
+                        ft.Container(height=8),
+                        ft.Text("Boas-vindas", size=24, weight="bold", color="#0F172A", text_align="center"),
+                        ft.Text("Socorro automotivo rápido na palma da mão", size=13, color="#64748B", text_align="center"),
+                        ft.Container(height=18),
+                        ft.Row([txt_telefone]),
                         ft.Container(height=10),
-                        ft.Text("Boas-vindas", size=26, weight="bold", color="#0F172A", text_align="center"),
-                        ft.Text("Socorro automotivo rápido na palma da mão", size=14, color="#64748B", text_align="center"),
-                        ft.Container(height=22),
-                        txt_telefone,
-                        ft.Container(height=12),
-                        txt_senha,
-                        ft.Container(height=6),
+                        ft.Row([txt_senha]),
+                        ft.Container(height=4),
                         lbl_erro,
-                        ft.Container(height=10),
+                        ft.Container(height=6),
                         ft.Row([criar_botao("Entrar na Conta", btn_login_click, "#0066FF", "white", 50, expandir=True)]),
-                        ft.Container(height=12),
+                        ft.Container(height=4),
                         ft.Row([
                             ft.TextButton("Esqueci a senha", on_click=lambda e: mostrar_tela("recuperar_senha")),
                             ft.TextButton("Criar nova conta", on_click=lambda e: mostrar_tela("cadastro_escolha"))
                         ], alignment="spaceBetween"),
-                        ft.Divider(height=24, color="#E2E8F0"),
-                        # Botão SOS de emergência acessível mesmo sem fazer login (para urgências na estrada)
-                        ft.Container(
-                            bgcolor="#FEF2F2",
-                            border=ft.Border.all(1.5, "#EF4444"),
-                            border_radius=12,
-                            padding=12,
-                            ink=True,
-                            on_click=lambda e: mostrar_tela("emergencia", None),
-                            content=ft.Row([
-                                ft.Container(
-                                    width=36, height=36, border_radius=18, bgcolor="#DC2626",
-                                    alignment=ft.Alignment(0, 0),
-                                    content=ft.Icon(ft.Icons.PHONE_IN_TALK, color="white", size=20)
-                                ),
-                                ft.Column([
-                                    ft.Text("SOS EMERGÊNCIA NA ESTRADA", weight="bold", size=13, color="#B91C1C"),
-                                    ft.Text("Ligar 190, 191, 192, 193 e Concessionárias", size=11, color="#7F1D1D")
-                                ], spacing=1, expand=True),
-                                ft.Icon(ft.Icons.CHEVRON_RIGHT, color="#DC2626")
-                            ], spacing=10)
-                        )
+                        ft.Container(height=8),
+                        # Botão SOS com a exata mesma largura e altura (52px) dos campos e botão de entrar
+                        ft.Row([
+                            ft.Container(
+                                height=54,
+                                bgcolor="#FEF2F2",
+                                border=ft.Border.all(1.5, "#EF4444"),
+                                border_radius=12,
+                                padding=ft.Padding(left=12, right=12, top=6, bottom=6),
+                                ink=True,
+                                expand=True,
+                                on_click=lambda e: mostrar_tela("emergencia", None),
+                                content=ft.Row([
+                                    ft.Container(
+                                        width=34, height=34, border_radius=17, bgcolor="#DC2626",
+                                        alignment=ft.Alignment(0, 0),
+                                        content=ft.Icon(ft.Icons.PHONE_IN_TALK, color="white", size=18)
+                                    ),
+                                    ft.Column([
+                                        ft.Text("SOS EMERGÊNCIA NA ESTRADA", weight="bold", size=12.5, color="#B91C1C"),
+                                        ft.Text("190, 191, 192, 193, GPS e Concessionárias", size=10.5, color="#7F1D1D")
+                                    ], spacing=0, alignment="center", expand=True),
+                                    ft.Icon(ft.Icons.CHEVRON_RIGHT, color="#DC2626", size=20)
+                                ], spacing=10, vertical_alignment="center")
+                            )
+                        ])
                     ]
                 )
             )
@@ -349,11 +401,11 @@ def main(page: ft.Page):
                 if not txt_nome.value or not txt_telefone.value or not txt_senha.value:
                     lbl_aviso.value = "Preencha todos os campos!"
                     lbl_aviso.color = "#DC2626"
-                elif db.telefone_existe(txt_telefone.value):
+                elif db.telefone_existe(txt_telefone.value.strip()):
                     lbl_aviso.value = "Este telefone já está cadastrado!"
                     lbl_aviso.color = "#DC2626"
                 else:
-                    db.cadastrar_usuario_cliente(txt_nome.value, txt_telefone.value, txt_senha.value)
+                    db.cadastrar_usuario_cliente(txt_nome.value.strip(), txt_telefone.value.strip(), txt_senha.value.strip())
                     lbl_aviso.value = "Conta criada com sucesso! Volte ao login."
                     lbl_aviso.color = "#16A34A"
                     txt_nome.value = txt_telefone.value = txt_senha.value = ""
@@ -366,7 +418,11 @@ def main(page: ft.Page):
                         ft.IconButton(icon=ft.Icons.ARROW_BACK, icon_color="#0F172A", on_click=lambda e: mostrar_tela("cadastro_escolha")),
                         ft.Text("Cadastro de Cliente", size=20, weight="bold", color="#0F172A")
                     ]),
-                    ft.Container(height=15), txt_nome, ft.Container(height=10), txt_telefone, ft.Container(height=10), txt_senha, ft.Container(height=10), lbl_aviso,
+                    ft.Container(height=15),
+                    ft.Row([txt_nome]), ft.Container(height=10),
+                    ft.Row([txt_telefone]), ft.Container(height=10),
+                    ft.Row([txt_senha]), ft.Container(height=10),
+                    lbl_aviso,
                     ft.Row([criar_botao("Concluir Cadastro", salvar_cliente, "#0066FF", "white", 50, expandir=True)])
                 ])
             )
@@ -384,11 +440,11 @@ def main(page: ft.Page):
                 if not txt_nome.value or not txt_oficina.value or not txt_telefone.value or not txt_senha.value:
                     lbl_aviso.value = "Preencha todos os campos!"
                     lbl_aviso.color = "#DC2626"
-                elif db.telefone_existe(txt_telefone.value):
+                elif db.telefone_existe(txt_telefone.value.strip()):
                     lbl_aviso.value = "Este telefone já está cadastrado!"
                     lbl_aviso.color = "#DC2626"
                 else:
-                    db.cadastrar_usuario_prestador(txt_nome.value, txt_telefone.value, txt_senha.value, txt_oficina.value, chk_24h.value)
+                    db.cadastrar_usuario_prestador(txt_nome.value.strip(), txt_telefone.value.strip(), txt_senha.value.strip(), txt_oficina.value.strip(), chk_24h.value)
                     lbl_aviso.value = "Oficina cadastrada com sucesso! Faça login."
                     lbl_aviso.color = "#16A34A"
                     txt_nome.value = txt_oficina.value = txt_telefone.value = txt_senha.value = ""
@@ -401,7 +457,12 @@ def main(page: ft.Page):
                         ft.IconButton(icon=ft.Icons.ARROW_BACK, icon_color="#0F172A", on_click=lambda e: mostrar_tela("cadastro_escolha")),
                         ft.Text("Cadastro de Parceiro", size=20, weight="bold", color="#0F172A")
                     ]),
-                    ft.Container(height=15), txt_nome, ft.Container(height=10), txt_oficina, ft.Container(height=10), txt_telefone, ft.Container(height=10), txt_senha, ft.Container(height=10), chk_24h, lbl_aviso,
+                    ft.Container(height=15),
+                    ft.Row([txt_nome]), ft.Container(height=10),
+                    ft.Row([txt_oficina]), ft.Container(height=10),
+                    ft.Row([txt_telefone]), ft.Container(height=10),
+                    ft.Row([txt_senha]), ft.Container(height=10),
+                    chk_24h, lbl_aviso,
                     ft.Row([criar_botao("Cadastrar Oficina", salvar_prestador, "#EA580C", "white", 50, expandir=True)])
                 ])
             )
@@ -413,11 +474,11 @@ def main(page: ft.Page):
             lbl_aviso = ft.Text("", size=13, weight="w600")
 
             def salvar_nova_senha(e):
-                if not db.telefone_existe(txt_telefone.value):
+                if not db.telefone_existe((txt_telefone.value or "").strip()):
                     lbl_aviso.value = "Telefone não encontrado!"
                     lbl_aviso.color = "#DC2626"
                 else:
-                    db.redefinir_senha(txt_telefone.value, txt_nova_senha.value)
+                    db.redefinir_senha(txt_telefone.value.strip(), txt_nova_senha.value.strip())
                     lbl_aviso.value = "Senha atualizada com sucesso!"
                     lbl_aviso.color = "#16A34A"
                 page.update()
@@ -429,41 +490,47 @@ def main(page: ft.Page):
                         ft.IconButton(icon=ft.Icons.ARROW_BACK, icon_color="#0F172A", on_click=lambda e: mostrar_tela("login")),
                         ft.Text("Recuperar Senha", size=20, weight="bold", color="#0F172A")
                     ]),
-                    ft.Container(height=15), txt_telefone, ft.Container(height=10), txt_nova_senha, ft.Container(height=10), lbl_aviso,
+                    ft.Container(height=15),
+                    ft.Row([txt_telefone]), ft.Container(height=10),
+                    ft.Row([txt_nova_senha]), ft.Container(height=10),
+                    lbl_aviso,
                     ft.Row([criar_botao("Redefinir Senha", salvar_nova_senha, "#0066FF", "white", 50, expandir=True)])
                 ])
             )
             page.add(criar_moldura_mobile(conteudo))
 
         # =====================================================================
-        # CENTRAL SOS DE EMERGÊNCIA (TELA CHEIA DE ACESSO IMEDIATO EM 1 TOQUE)
+        # CENTRAL SOS DE EMERGÊNCIA + LOCALIZAÇÃO E ORIENTAÇÃO SEM SINAL
         # =====================================================================
         elif nome_tela == "emergencia":
             tela_retorno = "cliente_home" if usuario_logado else "login"
+            
+            lbl_gps = ft.Text("Toque aqui para identificar sua rodovia/posição no mapa ou filtrar abaixo.", size=11.5, color="#15803D")
 
-            # Cartão compacto em Grade (2 por linha) para caber tudo na primeira tela sem rolagem!
+            def buscar_gps(e):
+                lbl_gps.value = "Abrindo localização exata no Google Maps para leitura da via/KM..."
+                page.update()
+                abrir_link("https://www.google.com/maps/search/?api=1&query=minha+localizacao+atual")
+
             def criar_botao_urgencia_topo(sigla, numero, subtitulo, cor_fundo, icone):
                 return ft.Container(
-                    expand=True,
-                    bgcolor=cor_fundo,
-                    border_radius=14,
-                    padding=ft.Padding(left=12, right=12, top=10, bottom=10),
-                    ink=True,
-                    shadow=ft.BoxShadow(blur_radius=6, color="#22000000", offset=ft.Offset(0, 3)),
+                    expand=True, bgcolor=cor_fundo, border_radius=14,
+                    padding=ft.Padding(left=10, right=10, top=10, bottom=10),
+                    ink=True, shadow=ft.BoxShadow(blur_radius=6, color="#22000000", offset=ft.Offset(0, 3)),
                     on_click=lambda e, num=numero: discar_emergencia(num),
                     content=ft.Row([
                         ft.Column([
                             ft.Row([
-                                ft.Icon(icone, color="white", size=18),
-                                ft.Text(sigla, color="white", weight="bold", size=14),
-                            ], spacing=5),
-                            ft.Text(numero, color="white", weight="bold", size=22),
+                                ft.Icon(icone, color="white", size=16),
+                                ft.Text(sigla, color="white", weight="bold", size=12.5),
+                            ], spacing=4),
+                            ft.Text(numero, color="white", weight="bold", size=21),
                             ft.Text(subtitulo, color="#F1F5F9", size=10, no_wrap=True)
                         ], spacing=1, expand=True),
                         ft.Container(
-                            width=38, height=38, border_radius=19, bgcolor="#FFFFFF",
+                            width=36, height=36, border_radius=18, bgcolor="#FFFFFF",
                             alignment=ft.Alignment(0, 0),
-                            content=ft.Icon(ft.Icons.PHONE_IN_TALK, color=cor_fundo, size=20)
+                            content=ft.Icon(ft.Icons.PHONE_IN_TALK, color=cor_fundo, size=19)
                         )
                     ], vertical_alignment="center")
                 )
@@ -474,16 +541,12 @@ def main(page: ft.Page):
                 num = item["fone"]
                 return ft.Container(
                     padding=ft.Padding(left=12, right=12, top=10, bottom=10),
-                    bgcolor="#FFFFFF",
-                    border_radius=12,
-                    border=ft.Border.all(1, "#CBD5E1"),
-                    ink=True,
-                    on_click=lambda e, n=num: discar_emergencia(n),
+                    bgcolor="#FFFFFF", border_radius=12, border=ft.Border.all(1, "#CBD5E1"),
+                    ink=True, on_click=lambda e, n=num: discar_emergencia(n),
                     content=ft.Row([
                         ft.Container(
                             padding=ft.Padding(left=8, right=8, top=6, bottom=6),
-                            bgcolor="#EFF6FF",
-                            border_radius=8,
+                            bgcolor="#EFF6FF", border_radius=8,
                             content=ft.Text(item["uf"], weight="bold", size=11, color="#0066FF")
                         ),
                         ft.Column([
@@ -492,10 +555,10 @@ def main(page: ft.Page):
                             ft.Text(f"📞 {num}", weight="bold", size=13, color="#16A34A")
                         ], spacing=1, expand=True),
                         ft.Container(
-                            width=42, height=42, border_radius=21, bgcolor="#16A34A",
+                            width=40, height=40, border_radius=20, bgcolor="#16A34A",
                             alignment=ft.Alignment(0, 0),
                             shadow=ft.BoxShadow(blur_radius=4, color="#3316A34A", offset=ft.Offset(0, 2)),
-                            content=ft.Icon(ft.Icons.CALL, color="white", size=22)
+                            content=ft.Icon(ft.Icons.CALL, color="white", size=20)
                         )
                     ], spacing=10, vertical_alignment="center")
                 )
@@ -513,27 +576,24 @@ def main(page: ft.Page):
 
             filtrar_concessionarias("")
 
-            txt_filtro_sos = ft.TextField(
-                hint_text="Filtrar rodovia ou estado (ex: 381, 040, MG, SP)...",
-                prefix_icon=ft.Icons.SEARCH,
-                bgcolor="#FFFFFF",
-                filled=True,
-                border_radius=10,
-                border_color="#94A3B8",
-                focused_border_color="#DC2626",
+            borda_sos = criar_borda_input("#94A3B8", "#DC2626", 10)
+            kwargs_sos = dict(
+                hint_text="Filtrar rodovia, cidade ou UF (ex: 381, 040, MG, SP)...",
+                prefix_icon=ft.Icons.SEARCH, bgcolor="#FFFFFF", filled=True,
                 content_padding=ft.Padding(left=12, right=12, top=10, bottom=10),
-                text_size=13,
+                text_size=13, expand=True,
                 on_change=lambda e: filtrar_concessionarias(e.control.value)
             )
+            if borda_sos is not None:
+                kwargs_sos["border"] = borda_sos
+            txt_filtro_sos = ft.TextField(**kwargs_sos)
 
             conteudo_sos = ft.Container(
                 expand=True,
                 bgcolor="#F8FAFC",
                 content=ft.Column(scroll="auto", spacing=0, controls=[
-                    # Cabeçalho Vermelho Compacto
                     ft.Container(
-                        bgcolor="#DC2626",
-                        padding=ft.Padding(left=12, right=16, top=14, bottom=14),
+                        bgcolor="#DC2626", padding=ft.Padding(left=12, right=16, top=14, bottom=14),
                         content=ft.Row([
                             ft.IconButton(icon=ft.Icons.ARROW_BACK, icon_color="white", on_click=lambda e: mostrar_tela(tela_retorno, usuario_logado)),
                             ft.Column([
@@ -543,38 +603,56 @@ def main(page: ft.Page):
                             ft.Icon(ft.Icons.EMERGENCY, color="white", size=28)
                         ])
                     ),
-                    # Painel Principal
                     ft.Container(
                         padding=ft.Padding(left=14, right=14, top=12, bottom=24),
                         content=ft.Column(spacing=10, controls=[
-                            ft.Text("ACIONAMENTO IMEDIATO (1 TOQUE):", weight="bold", size=12, color="#475569"),
-                            # Linha 1: PRF (191) e SAMU (192)
+                            # Alerta de Sobrevivência Sem Sinal / Sem Chip
+                            ft.Container(
+                                padding=12, bgcolor="#FFFBEB", border_radius=12, border=ft.Border.all(1.5, "#F59E0B"),
+                                content=ft.Row([
+                                    ft.Icon(ft.Icons.CELL_TOWER, color="#D97706", size=26),
+                                    ft.Column([
+                                        ft.Text("SINAL FRACO OU SEM OPERADORA?", weight="bold", size=12.5, color="#92400E"),
+                                        ft.Text("Ligue 190 (Polícia), 191 (PRF) ou 193 (Bombeiros). Chamadas de emergência usam antenas de qualquer operadora, mesmo sem internet ou sem chip.", size=11, color="#B45309")
+                                    ], spacing=2, expand=True)
+                                ])
+                            ),
+                            # Botão de Localização p/ quem não sabe onde está
+                            ft.Container(
+                                padding=12, bgcolor="#F0FDF4", border_radius=12, border=ft.Border.all(1.5, "#22C55E"),
+                                ink=True, on_click=buscar_gps,
+                                content=ft.Row([
+                                    ft.Icon(ft.Icons.LOCATION_ON, color="#16A34A", size=26),
+                                    ft.Column([
+                                        ft.Text("📍 Não sabe em qual estrada está?", weight="bold", size=13.5, color="#15803D"),
+                                        lbl_gps
+                                    ], spacing=2, expand=True),
+                                    ft.Icon(ft.Icons.MY_LOCATION, color="#16A34A")
+                                ])
+                            ),
+                            ft.Text("DISCAR URGÊNCIA (1 TOQUE):", weight="bold", size=12, color="#475569"),
                             ft.Row([
-                                criar_botao_urgencia_topo("PRF RODOVIÁRIA", "191", "Rodovias Federais", "#047857", ft.Icons.MINOR_CRASH),
-                                criar_botao_urgencia_topo("SAMU MÉDICO", "192", "Socorro / Ambulância", "#DC2626", ft.Icons.MEDICAL_SERVICES),
+                                criar_botao_urgencia_topo("PRF FEDERAL", "191", "Rodovias Federais", "#047857", ft.Icons.MINOR_CRASH),
+                                criar_botao_urgencia_topo("SAMU MÉDICO", "192", "Ambulância 24h", "#DC2626", ft.Icons.MEDICAL_SERVICES),
                             ], spacing=8),
-                            # Linha 2: Bombeiros (193) e Polícia Militar (190)
                             ft.Row([
-                                criar_botao_urgencia_topo("BOMBEIROS", "193", "Resgate / Incêndio", "#EA580C", ft.Icons.FIRE_TRUCK if hasattr(ft.Icons, "FIRE_TRUCK") else ft.Icons.LOCAL_FIRE_DEPARTMENT),
-                                criar_botao_urgencia_topo("POLÍCIA MILITAR", "190", "Segurança / Viatura", "#1E3A8A", ft.Icons.LOCAL_POLICE),
+                                criar_botao_urgencia_topo("BOMBEIROS", "193", "Resgate / Acidente", "#EA580C", ft.Icons.LOCAL_FIRE_DEPARTMENT),
+                                criar_botao_urgencia_topo("POLÍCIA MILITAR", "190", "Qualquer Operadora", "#1E3A8A", ft.Icons.LOCAL_POLICE),
                             ], spacing=8),
-                            # Linha 3: Polícia Rodoviária Estadual (198) e Polícia Civil / Defesa Civil
                             ft.Row([
-                                criar_botao_urgencia_topo("POL. ROD. ESTADUAL", "198", "Rodovias Estaduais", "#334155", ft.Icons.DIRECTIONS_CAR),
-                                criar_botao_urgencia_topo("DEFESA CIVIL", "199", "Deslizamento/Enchente", "#B45309", ft.Icons.WARNING),
+                                criar_botao_urgencia_topo("POL. RODOVIÁRIA", "198", "Rodovias Estaduais", "#334155", ft.Icons.DIRECTIONS_CAR),
+                                criar_botao_urgencia_topo("DEFESA CIVIL", "199", "Alagamento/Queda", "#B45309", ft.Icons.WARNING),
                             ], spacing=8),
-                            # Linha extra compacta: Polícia Civil (197) e ANTT (166)
                             ft.Row([
-                                criar_botao_urgencia_topo("POLÍCIA CIVIL", "197", "Ocorrências / Apoio", "#1E293B", ft.Icons.SECURITY),
-                                criar_botao_urgencia_topo("OUVIDORIA ANTT", "166", "Rodovias Concedidas", "#0284C7", ft.Icons.SUPPORT_AGENT),
+                                criar_botao_urgencia_topo("POLÍCIA CIVIL", "197", "Apoio / Ocorrência", "#1E293B", ft.Icons.SECURITY),
+                                criar_botao_urgencia_topo("ANTT RODOVIAS", "166", "Concessões Federais", "#0284C7", ft.Icons.SUPPORT_AGENT),
                             ], spacing=8),
-
                             ft.Divider(height=16, color="#CBD5E1"),
                             ft.Row([
                                 ft.Icon(ft.Icons.ADD_ROAD, color="#0066FF", size=20),
                                 ft.Text("Socorro 0800 das Concessionárias", weight="bold", size=16, color="#0F172A")
                             ], spacing=6),
-                            txt_filtro_sos,
+                            ft.Row([txt_filtro_sos]),
                             lista_concessionarias_ui
                         ])
                     )
@@ -583,7 +661,7 @@ def main(page: ft.Page):
             page.add(criar_moldura_mobile(conteudo_sos))
 
         # =====================================================================
-        # HOME DO CLIENTE (5 BOTÕES VISÍVEIS DIRETO NA TELA + BARRA INFERIOR COM SOS)
+        # HOME DO CLIENTE (100% CENTRALIZADA E ALINHADA NO CELULAR)
         # =====================================================================
         elif nome_tela == "cliente_home":
             lat_cliente, lon_cliente = -19.9386, -43.9341
@@ -594,20 +672,19 @@ def main(page: ft.Page):
             filtro_atual = [False]
             imagens_demo = ["mecanico_destaque.jpg", "reboque_socorro.jpg", "troca_pneu.jpg"]
 
-            txt_busca = ft.TextField(
+            borda_busca = criar_borda_input("#CBD5E1", "#0066FF", 12)
+            kwargs_busca = dict(
                 hint_text="O que você precisa hoje?",
-                prefix_icon=ft.Icons.SEARCH,
-                bgcolor="#F1F5F9",
-                filled=True,
-                border_radius=12,
-                border_color="#CBD5E1",
-                focused_border_color="#0066FF",
+                prefix_icon=ft.Icons.SEARCH, bgcolor="#F1F5F9", filled=True,
                 content_padding=ft.Padding(left=12, right=12, top=12, bottom=12),
-                text_size=14,
+                text_size=14, expand=True,
                 on_change=lambda e: carregar_vitrine(filtro_atual[0], e.control.value)
             )
+            if borda_busca is not None:
+                kwargs_busca["border"] = borda_busca
+            txt_busca = ft.TextField(**kwargs_busca)
 
-            # Cartões de categoria proporcionais (expand=True) para que os 5 botões (incluindo SOS) fiquem visíveis sem precisar rolar!
+            # Cada botão usa expand=True para dividir a largura da tela em 5 partes iguais sem nunca cortar na direita!
             def criar_card_categoria(icone, cor_icone, titulo, sub, acao, destaque_sos=False):
                 return ft.Container(
                     expand=True,
@@ -618,8 +695,7 @@ def main(page: ft.Page):
                         spacing=4,
                         controls=[
                             ft.Container(
-                                width=54,
-                                height=54,
+                                width=52, height=52,
                                 bgcolor="#DC2626" if destaque_sos else "#FFFFFF",
                                 border_radius=14,
                                 border=ft.Border.all(1.5, "#DC2626" if destaque_sos else "#E2E8F0"),
@@ -644,10 +720,7 @@ def main(page: ft.Page):
 
                 if not prestadores:
                     lista_vitrine.controls.append(
-                        ft.Container(
-                            padding=24, bgcolor="#FFFFFF", border_radius=16,
-                            content=ft.Text("Nenhum prestador encontrado para este filtro.", color="#64748B", text_align="center")
-                        )
+                        ft.Container(padding=24, bgcolor="#FFFFFF", border_radius=16, content=ft.Text("Nenhum prestador encontrado para este filtro.", color="#64748B", text_align="center"))
                     )
 
                 for i, p in enumerate(prestadores):
@@ -667,30 +740,17 @@ def main(page: ft.Page):
                         page.update()
 
                     card_oficina = ft.Container(
-                        bgcolor="#FFFFFF",
-                        border_radius=16,
-                        border=ft.Border.all(1, "#E2E8F0"),
-                        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                        bgcolor="#FFFFFF", border_radius=16, border=ft.Border.all(1, "#E2E8F0"), clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                         shadow=ft.BoxShadow(blur_radius=10, color="#0A000000", offset=ft.Offset(0, 4)),
                         content=ft.Column(spacing=0, controls=[
                             ft.Stack([
-                                ft.Row([
-                                    ft.Image(
-                                        src=img_src, 
-                                        height=150, 
-                                        expand=True,
-                                        fit="cover"
-                                    )
-                                ]),
+                                ft.Row([ft.Image(src=img_src, height=150, expand=True, fit="cover")]),
                                 ft.Container(
                                     content=ft.Row([
                                         ft.Container(width=7, height=7, border_radius=4, bgcolor="#FFFFFF"),
                                         ft.Text("ABERTO AGORA" if aberto else "FECHADO", color="white", size=10, weight="bold")
                                     ], spacing=5, tight=True),
-                                    bgcolor="#16A34A" if aberto else "#DC2626",
-                                    padding=ft.Padding(top=5, bottom=5, left=10, right=10),
-                                    border_radius=20,
-                                    margin=12
+                                    bgcolor="#16A34A" if aberto else "#DC2626", padding=ft.Padding(top=5, bottom=5, left=10, right=10), border_radius=20, margin=12
                                 )
                             ]),
                             ft.Container(
@@ -700,29 +760,15 @@ def main(page: ft.Page):
                                         ft.Text(p['nome_oficina'], weight="bold", size=16, color="#0F172A", expand=True),
                                         ft.Container(
                                             bgcolor="#FEF3C7", padding=ft.Padding(left=8, right=8, top=4, bottom=4), border_radius=8,
-                                            content=ft.Row([
-                                                ft.Icon(ft.Icons.STAR, size=14, color="#D97706"),
-                                                ft.Text(f"{p['nota_media']}", weight="bold", size=12, color="#92400E")
-                                            ], spacing=3)
+                                            content=ft.Row([ft.Icon(ft.Icons.STAR, size=14, color="#D97706"), ft.Text(f"{p['nota_media']}", weight="bold", size=12, color="#92400E")], spacing=3)
                                         )
                                     ], alignment="spaceBetween"),
                                     ft.Row([
-                                        ft.Icon(ft.Icons.LOCATION_ON, size=15, color="#64748B"),
-                                        ft.Text(f"{p['distancia_km']} km de você", color="#64748B", size=12),
-                                        ft.Text("•", color="#CBD5E1"),
-                                        ft.Text("Atendimento Rápido", color="#0066FF", size=12, weight="w500")
+                                        ft.Icon(ft.Icons.LOCATION_ON, size=15, color="#64748B"), ft.Text(f"{p['distancia_km']} km de você", color="#64748B", size=12),
+                                        ft.Text("•", color="#CBD5E1"), ft.Text("Atendimento Rápido", color="#0066FF", size=12, weight="w500")
                                     ], spacing=4),
                                     ft.Container(height=2),
-                                    ft.Row([
-                                        criar_botao(
-                                            "Solicitar Socorro Imediato",
-                                            solicitar_pedido,
-                                            "#0066FF" if aberto else "#94A3B8",
-                                            "white",
-                                            44,
-                                            expandir=True
-                                        )
-                                    ])
+                                    ft.Row([criar_botao("Solicitar Socorro Imediato", solicitar_pedido, "#0066FF" if aberto else "#94A3B8", "white", 44, expandir=True)])
                                 ])
                             )
                         ])
@@ -731,12 +777,10 @@ def main(page: ft.Page):
                 page.update()
 
             carregar_vitrine(False)
-
             primeiro_nome = usuario_logado['nome'].split()[0]
 
             bloco_topo_branco = ft.Container(
-                bgcolor="#FFFFFF",
-                padding=ft.Padding(left=14, right=14, top=16, bottom=18),
+                bgcolor="#FFFFFF", padding=ft.Padding(left=16, right=16, top=16, bottom=18),
                 content=ft.Column(spacing=14, controls=[
                     ft.Row([
                         ft.Row([
@@ -748,8 +792,7 @@ def main(page: ft.Page):
                         ], spacing=10),
                         ft.IconButton(icon=ft.Icons.LOGOUT, icon_color="#64748B", tooltip="Sair", on_click=lambda e: mostrar_tela("login"))
                     ], alignment="spaceBetween"),
-                    txt_busca,
-                    # 5 Botões alinhados lado a lado (Plantão, Mecânica, Reboque, Pneus e SOS) todos visíveis de imediato!
+                    ft.Row([txt_busca]),
                     ft.Row(
                         spacing=4,
                         alignment="spaceBetween",
@@ -759,32 +802,23 @@ def main(page: ft.Page):
                             criar_card_categoria(ft.Icons.CAR_REPAIR, "#0066FF", "Mecânica", "Geral", lambda e: carregar_vitrine(False)),
                             criar_card_categoria(ft.Icons.LOCAL_SHIPPING, "#D97706", "Reboque", "Guincho", lambda e: carregar_vitrine(True)),
                             criar_card_categoria(ft.Icons.BUILD_CIRCLE, "#16A34A", "Pneus e", "Bateria", lambda e: carregar_vitrine(False)),
-                            criar_card_categoria(ft.Icons.PHONE_IN_TALK, "#DC2626", "SOS", "Fones 190+", lambda e: mostrar_tela("emergencia", usuario_logado), destaque_sos=True),
+                            criar_card_categoria(ft.Icons.PHONE_IN_TALK, "#DC2626", "SOS", "Emergência", lambda e: mostrar_tela("emergencia", usuario_logado), destaque_sos=True),
                         ]
                     )
                 ])
             )
 
             banner_azul = ft.Container(
-                margin=ft.Padding(left=16, right=16, top=14, bottom=8),
-                padding=18,
-                border_radius=16,
-                gradient=ft.LinearGradient(
-                    begin=ft.Alignment(-1, -1),
-                    end=ft.Alignment(1, 1),
-                    colors=["#0052CC", "#0066FF", "#2684FF"]
-                ),
-                shadow=ft.BoxShadow(blur_radius=12, color="#330066FF", offset=ft.Offset(0, 4)),
-                on_click=lambda e: carregar_vitrine(True),
-                ink=True,
+                margin=ft.Padding(left=16, right=16, top=14, bottom=8), padding=18, border_radius=16,
+                gradient=ft.LinearGradient(begin=ft.Alignment(-1, -1), end=ft.Alignment(1, 1), colors=["#0052CC", "#0066FF", "#2684FF"]),
+                shadow=ft.BoxShadow(blur_radius=12, color="#330066FF", offset=ft.Offset(0, 4)), ink=True, on_click=lambda e: carregar_vitrine(True),
                 content=ft.Row([
                     ft.Column([
                         ft.Text("Emergência na via?", color="white", weight="bold", size=17),
                         ft.Text("Acione o plantão 24h mais próximo\ne acompanhe o atendimento.", color="#E0F2FE", size=12),
                     ], spacing=4, expand=True),
                     ft.Container(
-                        width=42, height=42, border_radius=21, bgcolor="#0043A6",
-                        alignment=ft.Alignment(0, 0),
+                        width=42, height=42, border_radius=21, bgcolor="#0043A6", alignment=ft.Alignment(0, 0),
                         content=ft.Icon(ft.Icons.ARROW_FORWARD, color="white", size=20)
                     )
                 ], spacing=10, vertical_alignment="center")
@@ -794,29 +828,15 @@ def main(page: ft.Page):
                 padding=ft.Padding(left=16, right=16, top=8, bottom=24),
                 content=ft.Column(spacing=12, controls=[
                     lbl_aviso_pedido,
-                    ft.Row([
-                        lbl_titulo_secao,
-                        ft.TextButton("Ver todos", on_click=lambda e: carregar_vitrine(False))
-                    ], alignment="spaceBetween", vertical_alignment="center"),
+                    ft.Row([lbl_titulo_secao, ft.TextButton("Ver todos", on_click=lambda e: carregar_vitrine(False))], alignment="spaceBetween", vertical_alignment="center"),
                     lista_vitrine
                 ])
             )
 
-            corpo_rolavel = ft.Column(
-                scroll="auto",
-                expand=True,
-                spacing=0,
-                controls=[
-                    bloco_topo_branco,
-                    banner_azul,
-                    secao_vitrine
-                ]
-            )
+            corpo_rolavel = ft.Column(scroll="auto", expand=True, spacing=0, controls=[bloco_topo_branco, banner_azul, secao_vitrine])
 
             nav_bar = ft.Container(
-                bgcolor="#FFFFFF",
-                padding=ft.Padding(top=8, bottom=10, left=8, right=8),
-                border=ft.Border(top=ft.BorderSide(1, "#E2E8F0")),
+                bgcolor="#FFFFFF", padding=ft.Padding(top=8, bottom=10, left=8, right=8), border=ft.Border(top=ft.BorderSide(1, "#E2E8F0")),
                 content=ft.Row([
                     ft.Container(on_click=lambda e: carregar_vitrine(False), expand=True, content=ft.Column([ft.Icon(ft.Icons.HOME, color="#0066FF", size=22), ft.Text("Início", size=11, color="#0066FF", weight="bold")], spacing=2, horizontal_alignment="center")),
                     ft.Container(on_click=lambda e: carregar_vitrine(True), expand=True, content=ft.Column([ft.Icon(ft.Icons.SEARCH, color="#64748B", size=22), ft.Text("Plantão 24h", size=11, color="#64748B")], spacing=2, horizontal_alignment="center")),
@@ -824,7 +844,6 @@ def main(page: ft.Page):
                     ft.Container(on_click=lambda e: mostrar_tela("login"), expand=True, content=ft.Column([ft.Icon(ft.Icons.PERSON, color="#64748B", size=22), ft.Text("Sair", size=11, color="#64748B")], spacing=2, horizontal_alignment="center")),
                 ], alignment="spaceAround")
             )
-
             page.add(criar_moldura_mobile(corpo_rolavel, nav_bar))
 
         elif nome_tela == "prestador_home":
@@ -837,12 +856,7 @@ def main(page: ft.Page):
                 pedidos = buscar_pedidos_prestador(pid)
                 
                 if not pedidos:
-                    lista_pedidos.controls.append(
-                        ft.Container(
-                            padding=24, bgcolor="#FFFFFF", border_radius=16, border=ft.Border.all(1, "#E2E8F0"),
-                            content=ft.Text("Nenhum chamado pendente no momento.", color="#64748B", text_align="center")
-                        )
-                    )
+                    lista_pedidos.controls.append(ft.Container(padding=24, bgcolor="#FFFFFF", border_radius=16, border=ft.Border.all(1, "#E2E8F0"), content=ft.Text("Nenhum chamado pendente no momento.", color="#64748B", text_align="center")))
                 
                 for p in pedidos:
                     status = p['status']
@@ -854,11 +868,11 @@ def main(page: ft.Page):
                     def abrir_whatsapp(e, tel=p['cliente_telefone'], ped_id=p['id']):
                         numero_limpo = str(tel).replace(" ", "").replace("-", "")
                         mensagem = urllib.parse.quote(f"Olá! Sou da oficina, falo sobre o chamado #{ped_id} no App Automotivo.")
-                        webbrowser.open(f"https://wa.me/55{numero_limpo}?text={mensagem}")
+                        abrir_link(f"https://wa.me/55{numero_limpo}?text={mensagem}")
                         
                     def abrir_maps(e, lat=p['lat_cliente'], lon=p['lon_cliente']):
                         destino = f"{lat},{lon}" if lat and lon else "-19.9166,-43.9344"
-                        webbrowser.open(f"https://www.google.com/maps/dir/?api=1&destination={destino}")
+                        abrir_link(f"https://www.google.com/maps/dir/?api=1&destination={destino}")
 
                     if status == 'pendente':
                         botoes = ft.Row([criar_botao("Aceitar Chamado (R$ 1,00)", aceitar, "#16A34A", "white", 46, expandir=True)])
@@ -869,18 +883,11 @@ def main(page: ft.Page):
                         ], spacing=8)
 
                     card = ft.Container(
-                        padding=16, bgcolor="#FFFFFF", border_radius=16,
-                        border=ft.Border.all(1.5, "#F59E0B" if status == 'pendente' else "#22C55E"),
-                        shadow=ft.BoxShadow(blur_radius=8, color="#0A000000", offset=ft.Offset(0, 3)),
+                        padding=16, bgcolor="#FFFFFF", border_radius=16, border=ft.Border.all(1.5, "#F59E0B" if status == 'pendente' else "#22C55E"), shadow=ft.BoxShadow(blur_radius=8, color="#0A000000", offset=ft.Offset(0, 3)),
                         content=ft.Column([
                             ft.Row([
                                 ft.Text(f"Cliente: {p['cliente_nome']}", weight="bold", size=15, color="#0F172A", expand=True),
-                                ft.Container(
-                                    padding=ft.Padding(left=10, right=10, top=4, bottom=4),
-                                    border_radius=12,
-                                    bgcolor="#FEF3C7" if status == 'pendente' else "#DCFCE7",
-                                    content=ft.Text(status.upper(), color="#B45309" if status == 'pendente' else "#15803D", weight="bold", size=11)
-                                )
+                                ft.Container(padding=ft.Padding(left=10, right=10, top=4, bottom=4), border_radius=12, bgcolor="#FEF3C7" if status == 'pendente' else "#DCFCE7", content=ft.Text(status.upper(), color="#B45309" if status == 'pendente' else "#15803D", weight="bold", size=11))
                             ], alignment="spaceBetween"),
                             ft.Divider(color="#F1F5F9"),
                             botoes
@@ -894,23 +901,8 @@ def main(page: ft.Page):
             corpo_prestador = ft.Column(
                 scroll="auto", expand=True, spacing=0,
                 controls=[
-                    ft.Container(
-                        bgcolor="#EA580C", padding=18,
-                        content=ft.Row([
-                            ft.Column([
-                                ft.Text(nome_oficina, color="white", weight="bold", size=18),
-                                ft.Text("Central de Chamados e Plantão", color="#FFEDD5", size=12)
-                            ], expand=True),
-                            ft.IconButton(icon=ft.Icons.LOGOUT, icon_color="white", on_click=lambda e: mostrar_tela("login"))
-                        ])
-                    ),
-                    ft.Container(
-                        padding=16,
-                        content=ft.Column(spacing=14, controls=[
-                            ft.Row([criar_botao("Atualizar Lista de Chamados", lambda e: carregar_pedidos(), "#0F172A", "white", 46, expandir=True)]),
-                            lista_pedidos
-                        ])
-                    )
+                    ft.Container(bgcolor="#EA580C", padding=18, content=ft.Row([ft.Column([ft.Text(nome_oficina, color="white", weight="bold", size=18), ft.Text("Central de Chamados e Plantão", color="#FFEDD5", size=12)], expand=True), ft.IconButton(icon=ft.Icons.LOGOUT, icon_color="white", on_click=lambda e: mostrar_tela("login"))])),
+                    ft.Container(padding=16, content=ft.Column(spacing=14, controls=[ft.Row([criar_botao("Atualizar Lista de Chamados", lambda e: carregar_pedidos(), "#0F172A", "white", 46, expandir=True)]), lista_pedidos]))
                 ]
             )
             page.add(criar_moldura_mobile(corpo_prestador))
@@ -918,12 +910,7 @@ def main(page: ft.Page):
         elif nome_tela == "admin":
             conteudo = ft.Container(
                 padding=22, expand=True, bgcolor="#FFFFFF",
-                content=ft.Column([
-                    ft.Text("Painel Administrativo", size=22, weight="bold", color="#0F172A"),
-                    ft.Text("Sessão de administrador ativa.", color="#64748B"),
-                    ft.Container(height=20),
-                    ft.Row([criar_botao("Encerrar Sessão", lambda e: mostrar_tela("login"), "#DC2626", "white", 48, expandir=True)])
-                ])
+                content=ft.Column([ft.Text("Painel Administrativo", size=22, weight="bold", color="#0F172A"), ft.Text("Sessão de administrador ativa.", color="#64748B"), ft.Container(height=20), ft.Row([criar_botao("Encerrar Sessão", lambda e: mostrar_tela("login"), "#DC2626", "white", 48, expandir=True)])])
             )
             page.add(criar_moldura_mobile(conteudo))
 
