@@ -10,6 +10,7 @@ import psycopg2.extras
 import os
 import base64
 import re
+import json
 import threading
 import time
 
@@ -69,43 +70,220 @@ def carregar_logo_base64():
     return "favicon.png"
 
 # =========================================================================
-# BASE NACIONAL DE CONCESSIONÁRIAS (0800 EMERGÊNCIA 24H)
+# BASE NACIONAL DE CONCESSIONÁRIAS (0800 EMERGÊNCIA 24H + TAGS DE BUSCA)
 # =========================================================================
 CONCESSIONARIAS_BRASIL = [
-    {"nome": "Arteris Fernão Dias", "rodovia": "BR-381 (BH / São Paulo)", "uf": "MG/SP", "fone": "0800 283 0381"},
-    {"nome": "EPR Via Mineira", "rodovia": "BR-040 (BH / Juiz de Fora)", "uf": "MG", "fone": "0800 003 1040"},
-    {"nome": "Via Cristais (BR-040)", "rodovia": "BR-040 (BH / Cristalina-GO)", "uf": "MG/GO", "fone": "0800 040 0040"},
-    {"nome": "Nova 381", "rodovia": "BR-381 (BH / Gov. Valadares)", "uf": "MG", "fone": "0800 038 1381"},
-    {"nome": "Way-262 / Concebra", "rodovia": "BR-262 e BR-153", "uf": "MG/GO", "fone": "0800 060 6000"},
-    {"nome": "Eco135", "rodovia": "BR-135, MG-231 e LMG-754", "uf": "MG", "fone": "0800 013 5135"},
-    {"nome": "Eco050", "rodovia": "BR-050 (Triângulo / GO)", "uf": "MG/GO", "fone": "0800 940 0700"},
-    {"nome": "EPR Sul de Minas", "rodovia": "MG-290, BR-459 (Sul MG)", "uf": "MG", "fone": "0800 290 0400"},
-    {"nome": "EPR Triângulo", "rodovia": "BR-452, BR-365, MG-190", "uf": "MG", "fone": "0800 452 0365"},
-    {"nome": "EPR Vias do Café", "rodovia": "BR-146, BR-265, MG-167", "uf": "MG", "fone": "0800 265 0491"},
-    {"nome": "Via Nascentes", "rodovia": "MG-050, BR-265, BR-491", "uf": "MG", "fone": "0800 282 0505"},
-    {"nome": "EcoRioMinas", "rodovia": "BR-116, BR-465 e BR-493", "uf": "MG/RJ", "fone": "0800 116 0493"},
-    {"nome": "CCR RioSP (Via Dutra)", "rodovia": "BR-116 e BR-101 (SP / RJ)", "uf": "SP/RJ", "fone": "0800 017 3536"},
-    {"nome": "Concer", "rodovia": "BR-040 (Juiz de Fora / RJ)", "uf": "MG/RJ", "fone": "0800 282 0040"},
-    {"nome": "Ecovias (Imigrantes/Anchieta)", "rodovia": "SP-150 e SP-160", "uf": "SP", "fone": "0800 019 7878"},
-    {"nome": "CCR AutoBAn", "rodovia": "Anhanguera e Bandeirantes", "uf": "SP", "fone": "0800 055 5550"},
-    {"nome": "CCR ViaOeste / SPVias", "rodovia": "Castelo Branco e Raposo", "uf": "SP", "fone": "0800 701 5555"},
-    {"nome": "Arteris Régis Bittencourt", "rodovia": "BR-116 (SP / Curitiba)", "uf": "SP/PR", "fone": "0800 709 0116"},
-    {"nome": "Ecopistas", "rodovia": "Ayrton Senna/Carvalho Pinto", "uf": "SP", "fone": "0800 777 0070"},
-    {"nome": "Rota das Bandeiras", "rodovia": "Corredor Dom Pedro (SP-065)", "uf": "SP", "fone": "0800 770 8070"},
-    {"nome": "Arteris Fluminense", "rodovia": "BR-101 (Niterói / ES)", "uf": "RJ", "fone": "0800 282 0101"},
-    {"nome": "Arteris Litoral Sul", "rodovia": "BR-116/101 (Curitiba / SC)", "uf": "PR/SC", "fone": "0800 725 1771"},
-    {"nome": "Arteris Planalto Sul", "rodovia": "BR-116 (PR / SC / RS)", "uf": "PR/SC", "fone": "0800 717 1000"},
-    {"nome": "CCR ViaSul", "rodovia": "BR-101, BR-290 e BR-386", "uf": "RS/SC", "fone": "0800 000 0290"},
-    {"nome": "Eco101", "rodovia": "BR-101 (ES / Sul da Bahia)", "uf": "ES/BA", "fone": "0800 770 1101"},
-    {"nome": "ViaBahia", "rodovia": "BR-324 e BR-116 (Bahia)", "uf": "BA", "fone": "0800 600 0324"},
-    {"nome": "Ecovias do Araguaia", "rodovia": "BR-153, BR-414 e BR-080", "uf": "GO/TO", "fone": "0800 153 0153"},
-    {"nome": "CCR MSVia", "rodovia": "BR-163 (Mato Grosso do Sul)", "uf": "MS", "fone": "0800 648 0163"},
-    {"nome": "Nova Rota do Oeste", "rodovia": "BR-163 e BR-364 (MT)", "uf": "MT", "fone": "0800 065 0163"},
+    {"nome": "Arteris Fernão Dias", "rodovia": "BR-381 (BH / São Paulo)", "uf": "MG/SP", "fone": "0800 283 0381", "tags": ["381", "fernao dias", "fernão dias", "betim", "contagem", "pouso alegre", "lavras", "varginha", "oliveira"]},
+    {"nome": "EPR Via Mineira", "rodovia": "BR-040 (BH / Juiz de Fora)", "uf": "MG", "fone": "0800 003 1040", "tags": ["040", "nova lima", "congonhas", "conselheiro lafaiete", "barbacena", "juiz de fora"]},
+    {"nome": "Via Cristais (BR-040)", "rodovia": "BR-040 (BH / Cristalina-GO)", "uf": "MG/GO", "fone": "0800 040 0040", "tags": ["040", "ribeirao das neves", "sete lagoas", "paraopeba", "curvelo", "paracatu", "cristalina"]},
+    {"nome": "Nova 381", "rodovia": "BR-381 (BH / Gov. Valadares)", "uf": "MG", "fone": "0800 038 1381", "tags": ["381", "sabara", "caete", "joao monlevade", "ipatinga", "governador valadares"]},
+    {"nome": "Way-262 / Concebra", "rodovia": "BR-262 e BR-153 (MG / GO)", "uf": "MG/GO", "fone": "0800 060 6000", "tags": ["262", "153", "betim", "juatuba", "pará de minas", "bom despacho", "araxa", "uberaba", "uberlandia"]},
+    {"nome": "Eco135", "rodovia": "BR-135, MG-231 e LMG-754", "uf": "MG", "fone": "0800 013 5135", "tags": ["135", "231", "754", "curvelo", "corinto", "bocaiuva", "montes claros"]},
+    {"nome": "Eco050", "rodovia": "BR-050 (Triângulo / GO)", "uf": "MG/GO", "fone": "0800 940 0700", "tags": ["050", "uberaba", "uberlandia", "araguari", "catalao"]},
+    {"nome": "EPR Sul de Minas", "rodovia": "MG-290, BR-459 (Sul MG)", "uf": "MG", "fone": "0800 290 0400", "tags": ["290", "459", "173", "455", "pouso alegre", "itajuba", "santa rita do sapucai", "ouro fino"]},
+    {"nome": "EPR Triângulo", "rodovia": "BR-452, BR-365, MG-190", "uf": "MG", "fone": "0800 452 0365", "tags": ["452", "365", "190", "427", "patrocinio", "monte carmelo", "uberlandia", "araxa"]},
+    {"nome": "EPR Vias do Café", "rodovia": "BR-146, BR-265, MG-167", "uf": "MG", "fone": "0800 265 0491", "tags": ["146", "265", "167", "varginha", "tres pontas", "alfenas", "guaxupe", "muzambinho"]},
+    {"nome": "Via Nascentes", "rodovia": "MG-050, BR-265, BR-491", "uf": "MG", "fone": "0800 282 0505", "tags": ["050", "265", "491", "mateus leme", "itauna", "divinopolis", "formiga", "piumhi", "passos", "sebastiao do paraiso"]},
+    {"nome": "EcoRioMinas", "rodovia": "BR-116, BR-465 e BR-493", "uf": "MG/RJ", "fone": "0800 116 0493", "tags": ["116", "465", "493", "governador valadares", "teofilo otoni", "caratinga", "muriae", "leopoldina", "alem paraiba", "mage"]},
+    {"nome": "CCR RioSP (Via Dutra)", "rodovia": "BR-116 e BR-101 (SP / RJ)", "uf": "SP/RJ", "fone": "0800 017 3536", "tags": ["116", "101", "dutra", "guarulhos", "sao jose dos campos", "taubate", "resende", "barra mansa", "volta redonda", "angra", "paraty"]},
+    {"nome": "Concer", "rodovia": "BR-040 (Juiz de Fora / RJ)", "uf": "MG/RJ", "fone": "0800 282 0040", "tags": ["040", "juiz de fora", "matias barbosa", "tres rios", "petropolis", "duque de caxias"]},
+    {"nome": "Ecovias (Imigrantes/Anchieta)", "rodovia": "SP-150 e SP-160", "uf": "SP", "fone": "0800 019 7878", "tags": ["150", "160", "imigrantes", "anchieta", "santos", "sao bernardo", "cubatao", "guaruja"]},
+    {"nome": "CCR AutoBAn", "rodovia": "Anhanguera e Bandeirantes", "uf": "SP", "fone": "0800 055 5550", "tags": ["330", "348", "anhanguera", "bandeirantes", "jundiai", "campinas", "limeira", "americana"]},
+    {"nome": "CCR ViaOeste / SPVias", "rodovia": "Castelo Branco e Raposo", "uf": "SP", "fone": "0800 701 5555", "tags": ["280", "270", "castelo branco", "raposo tavares", "barueri", "osasco", "sorocaba", "itu", "tatui"]},
+    {"nome": "Arteris Régis Bittencourt", "rodovia": "BR-116 (SP / Curitiba)", "uf": "SP/PR", "fone": "0800 709 0116", "tags": ["116", "regis bittencourt", "embú", "registro", "cajati", "curitiba"]},
+    {"nome": "Ecopistas", "rodovia": "Ayrton Senna/Carvalho Pinto", "uf": "SP", "fone": "0800 777 0070", "tags": ["070", "ayrton senna", "carvalho pinto", "itaquaquecetuba", "mogi", "sao jose dos campos", "taubate"]},
+    {"nome": "Rota das Bandeiras", "rodovia": "Corredor Dom Pedro (SP-065)", "uf": "SP", "fone": "0800 770 8070", "tags": ["065", "332", "dom pedro", "atibaia", "campinas", "itatiba", "jacarei"]},
+    {"nome": "Arteris Fluminense", "rodovia": "BR-101 (Niterói / ES)", "uf": "RJ", "fone": "0800 282 0101", "tags": ["101", "niteroi", "sao goncalo", "itaborai", "macae", "campos dos goytacazes"]},
+    {"nome": "Arteris Litoral Sul", "rodovia": "BR-116/101 (Curitiba / SC)", "uf": "PR/SC", "fone": "0800 725 1771", "tags": ["101", "116", "376", "joinville", "itajai", "balneario camboriu", "florianopolis", "sao jose dos pinhais"]},
+    {"nome": "Arteris Planalto Sul", "rodovia": "BR-116 (PR / SC / RS)", "uf": "PR/SC", "fone": "0800 717 1000", "tags": ["116", "mafra", "lages", "vacaria"]},
+    {"nome": "CCR ViaSul", "rodovia": "BR-101, BR-290 e BR-386", "uf": "RS/SC", "fone": "0800 000 0290", "tags": ["101", "290", "386", "freeway", "porto alegre", "canoas", "gravatai", "osorio", "torres", "lajeado"]},
+    {"nome": "Eco101", "rodovia": "BR-101 (ES / Sul da Bahia)", "uf": "ES/BA", "fone": "0800 770 1101", "tags": ["101", "vitoria", "serra", "vila velha", "cariacica", "guarapari", "linhares", "sao mateus", "cachoeiro"]},
+    {"nome": "ViaBahia", "rodovia": "BR-324 e BR-116 (Bahia)", "uf": "BA", "fone": "0800 600 0324", "tags": ["324", "116", "salvador", "simoes filho", "feira de santana", "jequie", "vitoria da conquista"]},
+    {"nome": "Ecovias do Araguaia", "rodovia": "BR-153, BR-414 e BR-080", "uf": "GO/TO", "fone": "0800 153 0153", "tags": ["153", "414", "080", "anapolis", "porangatu", "gurupi"]},
+    {"nome": "CCR MSVia", "rodovia": "BR-163 (Mato Grosso do Sul)", "uf": "MS", "fone": "0800 648 0163", "tags": ["163", "campo grande", "dourados", "coxim", "navirai"]},
+    {"nome": "Nova Rota do Oeste", "rodovia": "BR-163 e BR-364 (MT)", "uf": "MT", "fone": "0800 065 0163", "tags": ["163", "364", "cuiaba", "rondonopolis", "sinop", "sorriso", "lucas do rio verde"]},
 ]
+
+MAPA_ESTADOS_UF = {
+    "minas gerais": "MG", "são paulo": "SP", "sao paulo": "SP", "rio de janeiro": "RJ",
+    "espírito santo": "ES", "espirito santo": "ES", "paraná": "PR", "parana": "PR",
+    "santa catarina": "SC", "rio grande do sul": "RS", "bahia": "BA", "goiás": "GO",
+    "goias": "GO", "tocantins": "TO", "mato grosso do sul": "MS", "mato grosso": "MT",
+    "distrito federal": "DF"
+}
+
+
+def criar_localizador_html():
+    """Cria uma página HTML ultraleve em assets/gps.html que lê o GPS do celular,
+    identifica o nome da rodovia/estrada no OpenStreetMap e já mostra a concessionária certa."""
+    os.makedirs("assets", exist_ok=True)
+    caminho_html = os.path.join("assets", "gps.html")
+    dados_json = json.dumps(CONCESSIONARIAS_BRASIL, ensure_ascii=False)
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar SOS de Estrada</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAFC; margin: 0; padding: 16px; color: #0F172A; }}
+  .box {{ max-width: 420px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #E2E8F0; }}
+  .header {{ background: #DC2626; color: white; padding: 14px 16px; border-radius: 12px; font-weight: bold; font-size: 17px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }}
+  .status {{ background: #F0FDF4; border: 1.5px solid #22C55E; padding: 14px; border-radius: 12px; margin-bottom: 14px; font-size: 14px; line-height: 1.4; }}
+  .road-badge {{ display: inline-block; background: #0066FF; color: white; font-weight: bold; padding: 4px 10px; border-radius: 8px; font-size: 15px; margin-top: 6px; }}
+  .card {{ border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 12px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; text-decoration: none; color: inherit; }}
+  .btn-call {{ background: #16A34A; color: white; padding: 10px 14px; border-radius: 10px; font-weight: bold; text-decoration: none; font-size: 14px; white-space: nowrap; }}
+  .btn-maps {{ display: block; text-align: center; background: #0066FF; color: white; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none; margin-top: 12px; font-size: 14px; }}
+  .urg-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }}
+  .urg-btn {{ background: #1E293B; color: white; padding: 10px; border-radius: 10px; text-align: center; text-decoration: none; font-weight: bold; font-size: 14px; }}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="header">
+    <span>📍 Localizador SOS de Rodovia</span>
+  </div>
+  <div id="painel" class="status">
+    <b>Obtendo sinal dos satélites GPS...</b><br>
+    Por favor, clique em <b>"Permitir"</b> se o navegador solicitar acesso à sua localização.
+  </div>
+  <div id="resultados"></div>
+  <div class="urg-grid">
+    <a class="urg-btn" style="background:#047857" href="tel:191">📞 PRF 191</a>
+    <a class="urg-btn" style="background:#DC2626" href="tel:192">🚑 SAMU 192</a>
+    <a class="urg-btn" style="background:#EA580C" href="tel:193">🚒 Bombeiros 193</a>
+    <a class="urg-btn" style="background:#1E3A8A" href="tel:190">🚓 Polícia 190</a>
+  </div>
+</div>
+<script>
+const CONCS = {dados_json};
+const painel = document.getElementById('painel');
+const resultados = document.getElementById('resultados');
+
+function renderizarConcessionarias(filtroTexto, ufDetectada) {{
+  let texto = (filtroTexto || "").toLowerCase();
+  let numRodovia = "";
+  let matchNum = texto.match(/(?:br|mg|sp|rj|pr|sc|rs|ba|go|mt|ms|es)[\\s\\-]*(\\d{{3}})/i);
+  if (matchNum) numRodovia = matchNum[1];
+
+  let achadas = CONCS.filter(c => {{
+    if (numRodovia && c.rodovia.includes(numRodovia)) return true;
+    for (let t of c.tags) {{
+      if (texto.includes(t.toLowerCase())) return true;
+    }}
+    return false;
+  }});
+
+  if (achadas.length === 0 && ufDetectada) {{
+    achadas = CONCS.filter(c => c.uf.includes(ufDetectada));
+  }}
+  if (achadas.length === 0) achadas = CONCS.slice(0, 6);
+
+  let html = "<h4 style='margin:14px 0 6px 0;'>Concessionárias indicadas para o seu trecho:</h4>";
+  achadas.forEach(c => {{
+    let foneLimpo = c.fone.replace(/\\D/g, '');
+    html += `<div class="card">
+      <div>
+        <div style="font-weight:bold;font-size:15px;">${{c.nome}} (${{c.uf}})</div>
+        <div style="font-size:12px;color:#475569;">${{c.rodovia}}</div>
+        <div style="font-size:14px;color:#16A34A;font-weight:bold;margin-top:2px;">📞 ${{c.fone}}</div>
+      </div>
+      <a class="btn-call" href="tel:${{foneLimpo}}">Ligar</a>
+    </div>`;
+  }});
+  resultados.innerHTML = html;
+}}
+
+if ("geolocation" in navigator) {{
+  navigator.geolocation.getCurrentPosition(async function(pos) {{
+    const lat = pos.coords.latitude.toFixed(5);
+    const lon = pos.coords.longitude.toFixed(5);
+    painel.innerHTML = `<b>✅ Coordenada GPS capturada!</b><br>Lat: <b>${{lat}}</b> | Lon: <b>${{lon}}</b><br>Identificando nome da rodovia/via...`;
+
+    try {{
+      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${{lat}}&lon=${{lon}}&zoom=16&addressdetails=1`);
+      const data = await resp.json();
+      const addr = data.address || {{}};
+      const via = addr.road || addr.highway || addr.ref || data.name || "Via não tabelada / Estrada rural";
+      const refRodovia = addr.ref || "";
+      const cidade = addr.city || addr.town || addr.municipality || addr.village || "";
+      const estado = addr.state || "";
+      const textoBusca = `${{via}} ${{refRodovia}} ${{cidade}} ${{estado}}`;
+
+      painel.innerHTML = `
+        <b>✅ Localização Identificada com Sucesso!</b><br>
+        <span class="road-badge">🛣️ ${{refRodovia ? refRodovia + ' - ' : ''}}${{via}}</span><br>
+        <div style="margin-top:6px;">📍 <b>Município:</b> ${{cidade}} - ${{estado}}</div>
+        <div style="font-size:12px;color:#475569;margin-top:2px;">Coordenadas p/ Resgate: <b>${{lat}}, ${{lon}}</b></div>
+        <a class="btn-maps" href="https://www.google.com/maps/search/?api=1&query=${{lat}},${{lon}}" target="_blank">🗺️ Abrir Pino Exato no Google Maps</a>
+      `;
+      renderizarConcessionarias(textoBusca, estado.substring(0,2).toUpperCase());
+    }} catch (e) {{
+      painel.innerHTML = `
+        <b>✅ Coordenada GPS Obtida (Modo Sem Mapa):</b><br>
+        Informe ao socorro: <b>Latitude ${{lat}}, Longitude ${{lon}}</b>
+        <a class="btn-maps" href="https://www.google.com/maps/search/?api=1&query=${{lat}},${{lon}}" target="_blank">🗺️ Ver no Google Maps</a>
+      `;
+      renderizarConcessionarias("", "MG");
+    }}
+  }}, function(err) {{
+    painel.style.background = "#FFFBEB";
+    painel.style.borderColor = "#F59E0B";
+    painel.innerHTML = `<b>⚠️ Permissão de GPS bloqueada ou sem sinal de satélite.</b><br>Ative a localização do celular e recarregue a página, ou ligue diretamente para o <b>191 (PRF)</b> ou <b>190 (PM)</b> abaixo.`;
+    renderizarConcessionarias("", "MG");
+  }}, {{ enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }});
+}} else {{
+  painel.innerHTML = "GPS não suportado neste navegador.";
+}}
+</script>
+</body>
+</html>"""
+    try:
+        with open(caminho_html, "w", encoding="utf-8") as f:
+            f.write(html)
+    except Exception:
+        pass
+
+criar_localizador_html()
+
+
+def identificar_localizacao_servidor(lat=None, lon=None):
+    """Identifica a rodovia/cidade e retorna o resumo e o termo de filtro para as concessionárias."""
+    try:
+        if lat is None or lon is None:
+            req_ip = urllib.request.Request("http://ip-api.com/json/?fields=status,region,regionName,city,lat,lon", headers={"User-Agent": "AppAutomotivo/1.0"})
+            with urllib.request.urlopen(req_ip, timeout=4) as r:
+                dados_ip = json.loads(r.read().decode("utf-8"))
+                if dados_ip.get("status") == "success":
+                    lat = dados_ip.get("lat")
+                    lon = dados_ip.get("lon")
+
+        if lat is not None and lon is not None:
+            url_nom = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=16&addressdetails=1"
+            req_nom = urllib.request.Request(url_nom, headers={"User-Agent": "AppAutomotivoSOS/1.0"})
+            with urllib.request.urlopen(req_nom, timeout=5) as r:
+                dados = json.loads(r.read().decode("utf-8"))
+                addr = dados.get("address", {})
+                via = addr.get("road") or addr.get("highway") or dados.get("name") or "Via local"
+                ref = addr.get("ref") or ""
+                cidade = addr.get("city") or addr.get("town") or addr.get("municipality") or addr.get("village") or ""
+                estado_nome = (addr.get("state") or "").lower()
+                uf = MAPA_ESTADOS_UF.get(estado_nome, "MG")
+                return {
+                    "sucesso": True,
+                    "lat": lat,
+                    "lon": lon,
+                    "via": f"{ref} - {via}" if ref else via,
+                    "cidade": cidade,
+                    "uf": uf,
+                    "termo": ref if ref else (cidade if cidade else uf)
+                }
+    except Exception:
+        pass
+    return {"sucesso": False}
 
 
 def criar_borda_input(cor_normal="#94A3B8", cor_foco="#0066FF", raio=12):
-    """Cria borda compatível tanto com Flet 1.0+ (side=) quanto versões anteriores."""
     try:
         b_normal = ft.OutlineInputBorder(border_radius=raio, side=ft.BorderSide(1, cor_normal))
         b_foco = ft.OutlineInputBorder(border_radius=raio, side=ft.BorderSide(2, cor_foco))
@@ -232,7 +410,7 @@ def main(page: ft.Page):
         page.clean()
 
         # =====================================================================
-        # TELA DE LOGIN (SIMÉTRICA, COMPACTA E COM SOS VISÍVEL SEM ROLAGEM)
+        # TELA DE LOGIN
         # =====================================================================
         if nome_tela == "login":
             txt_telefone = criar_input("Telefone Cadastrado", icone=ft.Icons.PHONE)
@@ -262,7 +440,6 @@ def main(page: ft.Page):
                     )
                     user = cursor.fetchone()
 
-                    # Caso tenha digitado com ou sem zero à esquerda (ex: 031 vs 31)
                     if not user and tel_digitado.startswith("0"):
                         cursor.execute(
                             "SELECT id, nome, tipo_perfil FROM usuarios WHERE TRIM(telefone) = %s AND TRIM(senha_hash) = %s",
@@ -321,7 +498,6 @@ def main(page: ft.Page):
                             ft.TextButton("Criar nova conta", on_click=lambda e: mostrar_tela("cadastro_escolha"))
                         ], alignment="spaceBetween"),
                         ft.Container(height=8),
-                        # Botão SOS com a exata mesma largura e altura (52px) dos campos e botão de entrar
                         ft.Row([
                             ft.Container(
                                 height=54,
@@ -500,17 +676,124 @@ def main(page: ft.Page):
             page.add(criar_moldura_mobile(conteudo))
 
         # =====================================================================
-        # CENTRAL SOS DE EMERGÊNCIA + LOCALIZAÇÃO E ORIENTAÇÃO SEM SINAL
+        # CENTRAL SOS DE EMERGÊNCIA + RADAR GPS DE RODOVIA E CONCESSIONÁRIA
         # =====================================================================
         elif nome_tela == "emergencia":
             tela_retorno = "cliente_home" if usuario_logado else "login"
             
-            lbl_gps = ft.Text("Toque aqui para identificar sua rodovia/posição no mapa ou filtrar abaixo.", size=11.5, color="#15803D")
+            lbl_gps_titulo = ft.Text("📍 Descobrir em qual estrada estou (GPS)", weight="bold", size=13.5, color="#15803D")
+            lbl_gps = ft.Text("Toque aqui para detectar sua rodovia, KM e concessionária.", size=11.5, color="#15803D")
+            container_botoes_gps = ft.Row(visible=False, spacing=8)
 
-            def buscar_gps(e):
-                lbl_gps.value = "Abrindo localização exata no Google Maps para leitura da via/KM..."
+            lista_concessionarias_ui = ft.Column(spacing=8)
+
+            def criar_item_concessionaria(item, destaque=False):
+                num = item["fone"]
+                return ft.Container(
+                    padding=ft.Padding(left=12, right=12, top=10, bottom=10),
+                    bgcolor="#F0FDF4" if destaque else "#FFFFFF",
+                    border_radius=12,
+                    border=ft.Border.all(2 if destaque else 1, "#16A34A" if destaque else "#CBD5E1"),
+                    ink=True,
+                    on_click=lambda e, n=num: discar_emergencia(n),
+                    content=ft.Row([
+                        ft.Container(
+                            padding=ft.Padding(left=8, right=8, top=6, bottom=6),
+                            bgcolor="#DCFCE7" if destaque else "#EFF6FF",
+                            border_radius=8,
+                            content=ft.Text(item["uf"], weight="bold", size=11, color="#15803D" if destaque else "#0066FF")
+                        ),
+                        ft.Column([
+                            ft.Text(item["nome"], weight="bold", size=14, color="#0F172A"),
+                            ft.Text(item["rodovia"], size=11, color="#475569"),
+                            ft.Text(f"📞 {num}", weight="bold", size=13, color="#16A34A")
+                        ], spacing=1, expand=True),
+                        ft.Container(
+                            width=40, height=40, border_radius=20, bgcolor="#16A34A",
+                            alignment=ft.Alignment(0, 0),
+                            shadow=ft.BoxShadow(blur_radius=4, color="#3316A34A", offset=ft.Offset(0, 2)),
+                            content=ft.Icon(ft.Icons.CALL, color="white", size=20)
+                        )
+                    ], spacing=10, vertical_alignment="center")
+                )
+
+            def filtrar_concessionarias(termo=""):
+                lista_concessionarias_ui.controls.clear()
+                t = (termo or "").strip().lower()
+                filtradas = []
+                for c in CONCESSIONARIAS_BRASIL:
+                    tags_str = " ".join(c.get("tags", [])).lower()
+                    if not t or t in c["nome"].lower() or t in c["rodovia"].lower() or t in c["uf"].lower() or t in c["fone"].lower() or t in tags_str:
+                        filtradas.append(c)
+
+                if not filtradas:
+                    lista_concessionarias_ui.controls.append(
+                        ft.Container(
+                            padding=14, bgcolor="#FFFFFF", border_radius=12, border=ft.Border.all(1, "#CBD5E1"),
+                            content=ft.Text(
+                                f"Nenhuma concessionária privada encontrada para '{termo}'. Em rodovias não concedidas ou estradas rurais/terra, ligue 191 (PRF), 198 (Polícia Rod. Estadual) ou 193 (Bombeiros) acima.",
+                                size=12, color="#475569"
+                            )
+                        )
+                    )
+                else:
+                    for c in filtradas:
+                        lista_concessionarias_ui.controls.append(criar_item_concessionaria(c, destaque=bool(t)))
                 page.update()
-                abrir_link("https://www.google.com/maps/search/?api=1&query=minha+localizacao+atual")
+
+            borda_sos = criar_borda_input("#94A3B8", "#DC2626", 10)
+            kwargs_sos = dict(
+                hint_text="Digite a rodovia, cidade ou UF (ex: 381, 040, MG)...",
+                # Lupa posicionada na DIREITA (suffix_icon) para não atrapalhar a escrita da esquerda para a direita!
+                suffix_icon=ft.Icons.SEARCH,
+                bgcolor="#FFFFFF",
+                filled=True,
+                content_padding=ft.Padding(left=14, right=12, top=10, bottom=10),
+                text_size=13,
+                expand=True,
+                on_change=lambda e: filtrar_concessionarias(e.control.value),
+                on_submit=lambda e: filtrar_concessionarias(e.control.value)
+            )
+            if borda_sos is not None:
+                kwargs_sos["border"] = borda_sos
+            txt_filtro_sos = ft.TextField(**kwargs_sos)
+
+            def acionar_localizador_estrada(e):
+                lbl_gps_titulo.value = "🛰️ Localizando sua via e concessionária..."
+                lbl_gps.value = "Consultando coordenadas e mapa rodoviário..."
+                page.update()
+
+                # 1. Abre o Radar GPS HTML5 de alta precisão do próprio aplicativo (que lê o satélite do celular e faz geocodificação reversa da estrada)
+                abrir_link("/gps.html")
+
+                # 2. Simultaneamente, já atualiza e filtra a tela atual com os dados da região identificada
+                info = identificar_localizacao_servidor()
+                if info.get("sucesso"):
+                    via_nome = info["via"]
+                    cid = info["cidade"]
+                    uf = info["uf"]
+                    lat_d = info["lat"]
+                    lon_d = info["lon"]
+                    lbl_gps_titulo.value = f"✅ Via detectada: {via_nome}"
+                    lbl_gps.value = f"Município/Região: {cid} - {uf} ({lat_d:.4f}, {lon_d:.4f})\nAs concessionárias abaixo foram filtradas para a sua região!"
+                    txt_filtro_sos.value = info["termo"]
+                    filtrar_concessionarias(info["termo"])
+                    container_botoes_gps.controls = [
+                        criar_botao("🗺️ Ver Pino no Maps", lambda ev: abrir_link(f"https://www.google.com/maps/search/?api=1&query={lat_d},{lon_d}"), "#0066FF", "white", 38, expandir=True),
+                        criar_botao("📡 Radar GPS Satélite", lambda ev: abrir_link("/gps.html"), "#16A34A", "white", 38, expandir=True),
+                    ]
+                    container_botoes_gps.visible = True
+                else:
+                    lbl_gps_titulo.value = "📡 Radar GPS aberto no navegador!"
+                    lbl_gps.value = "Permita o acesso ao GPS na janela aberta para ver o nome exato da rodovia e sua coordenada."
+                    container_botoes_gps.controls = [
+                        criar_botao("📡 Abrir Radar GPS de Rodovia", lambda ev: abrir_link("/gps.html"), "#16A34A", "white", 40, expandir=True),
+                        criar_botao("🗺️ Abrir Google Maps", lambda ev: abrir_link("https://www.google.com/maps"), "#0066FF", "white", 40, expandir=True),
+                    ]
+                    container_botoes_gps.visible = True
+                page.update()
+
+            filtrar_concessionarias("")
 
             def criar_botao_urgencia_topo(sigla, numero, subtitulo, cor_fundo, icone):
                 return ft.Container(
@@ -535,59 +818,6 @@ def main(page: ft.Page):
                     ], vertical_alignment="center")
                 )
 
-            lista_concessionarias_ui = ft.Column(spacing=8)
-
-            def criar_item_concessionaria(item):
-                num = item["fone"]
-                return ft.Container(
-                    padding=ft.Padding(left=12, right=12, top=10, bottom=10),
-                    bgcolor="#FFFFFF", border_radius=12, border=ft.Border.all(1, "#CBD5E1"),
-                    ink=True, on_click=lambda e, n=num: discar_emergencia(n),
-                    content=ft.Row([
-                        ft.Container(
-                            padding=ft.Padding(left=8, right=8, top=6, bottom=6),
-                            bgcolor="#EFF6FF", border_radius=8,
-                            content=ft.Text(item["uf"], weight="bold", size=11, color="#0066FF")
-                        ),
-                        ft.Column([
-                            ft.Text(item["nome"], weight="bold", size=14, color="#0F172A"),
-                            ft.Text(item["rodovia"], size=11, color="#475569"),
-                            ft.Text(f"📞 {num}", weight="bold", size=13, color="#16A34A")
-                        ], spacing=1, expand=True),
-                        ft.Container(
-                            width=40, height=40, border_radius=20, bgcolor="#16A34A",
-                            alignment=ft.Alignment(0, 0),
-                            shadow=ft.BoxShadow(blur_radius=4, color="#3316A34A", offset=ft.Offset(0, 2)),
-                            content=ft.Icon(ft.Icons.CALL, color="white", size=20)
-                        )
-                    ], spacing=10, vertical_alignment="center")
-                )
-
-            def filtrar_concessionarias(termo=""):
-                lista_concessionarias_ui.controls.clear()
-                t = termo.strip().lower()
-                filtradas = [
-                    c for c in CONCESSIONARIAS_BRASIL
-                    if not t or t in c["nome"].lower() or t in c["rodovia"].lower() or t in c["uf"].lower() or t in c["fone"].lower()
-                ]
-                for c in filtradas:
-                    lista_concessionarias_ui.controls.append(criar_item_concessionaria(c))
-                page.update()
-
-            filtrar_concessionarias("")
-
-            borda_sos = criar_borda_input("#94A3B8", "#DC2626", 10)
-            kwargs_sos = dict(
-                hint_text="Filtrar rodovia, cidade ou UF (ex: 381, 040, MG, SP)...",
-                prefix_icon=ft.Icons.SEARCH, bgcolor="#FFFFFF", filled=True,
-                content_padding=ft.Padding(left=12, right=12, top=10, bottom=10),
-                text_size=13, expand=True,
-                on_change=lambda e: filtrar_concessionarias(e.control.value)
-            )
-            if borda_sos is not None:
-                kwargs_sos["border"] = borda_sos
-            txt_filtro_sos = ft.TextField(**kwargs_sos)
-
             conteudo_sos = ft.Container(
                 expand=True,
                 bgcolor="#F8FAFC",
@@ -606,28 +836,35 @@ def main(page: ft.Page):
                     ft.Container(
                         padding=ft.Padding(left=14, right=14, top=12, bottom=24),
                         content=ft.Column(spacing=10, controls=[
+                            # Card de Localização Automática da Estrada
+                            ft.Container(
+                                padding=12, bgcolor="#F0FDF4", border_radius=12, border=ft.Border.all(1.5, "#22C55E"),
+                                ink=True, on_click=acionar_localizador_estrada,
+                                content=ft.Column(spacing=8, controls=[
+                                    ft.Row([
+                                        ft.Container(
+                                            width=40, height=40, border_radius=20, bgcolor="#16A34A",
+                                            alignment=ft.Alignment(0, 0),
+                                            content=ft.Icon(ft.Icons.MY_LOCATION, color="white", size=22)
+                                        ),
+                                        ft.Column([
+                                            lbl_gps_titulo,
+                                            lbl_gps
+                                        ], spacing=2, expand=True),
+                                        ft.Icon(ft.Icons.CHEVRON_RIGHT, color="#16A34A")
+                                    ]),
+                                    container_botoes_gps
+                                ])
+                            ),
                             # Alerta de Sobrevivência Sem Sinal / Sem Chip
                             ft.Container(
                                 padding=12, bgcolor="#FFFBEB", border_radius=12, border=ft.Border.all(1.5, "#F59E0B"),
                                 content=ft.Row([
-                                    ft.Icon(ft.Icons.CELL_TOWER, color="#D97706", size=26),
+                                    ft.Icon(ft.Icons.CELL_TOWER, color="#D97706", size=24),
                                     ft.Column([
-                                        ft.Text("SINAL FRACO OU SEM OPERADORA?", weight="bold", size=12.5, color="#92400E"),
-                                        ft.Text("Ligue 190 (Polícia), 191 (PRF) ou 193 (Bombeiros). Chamadas de emergência usam antenas de qualquer operadora, mesmo sem internet ou sem chip.", size=11, color="#B45309")
+                                        ft.Text("SINAL FRACO, ESTRADA DE TERRA OU SEM CHIP?", weight="bold", size=12, color="#92400E"),
+                                        ft.Text("Ligue 190 (PM), 191 (PRF) ou 193 (Bombeiros). Ligações de emergência usam antenas de qualquer operadora disponível, mesmo sem crédito ou sem internet.", size=11, color="#B45309")
                                     ], spacing=2, expand=True)
-                                ])
-                            ),
-                            # Botão de Localização p/ quem não sabe onde está
-                            ft.Container(
-                                padding=12, bgcolor="#F0FDF4", border_radius=12, border=ft.Border.all(1.5, "#22C55E"),
-                                ink=True, on_click=buscar_gps,
-                                content=ft.Row([
-                                    ft.Icon(ft.Icons.LOCATION_ON, color="#16A34A", size=26),
-                                    ft.Column([
-                                        ft.Text("📍 Não sabe em qual estrada está?", weight="bold", size=13.5, color="#15803D"),
-                                        lbl_gps
-                                    ], spacing=2, expand=True),
-                                    ft.Icon(ft.Icons.MY_LOCATION, color="#16A34A")
                                 ])
                             ),
                             ft.Text("DISCAR URGÊNCIA (1 TOQUE):", weight="bold", size=12, color="#475569"),
@@ -661,7 +898,7 @@ def main(page: ft.Page):
             page.add(criar_moldura_mobile(conteudo_sos))
 
         # =====================================================================
-        # HOME DO CLIENTE (100% CENTRALIZADA E ALINHADA NO CELULAR)
+        # HOME DO CLIENTE (COM LUPA NA DIREITA E 5 BOTÕES CENTRALIZADOS)
         # =====================================================================
         elif nome_tela == "cliente_home":
             lat_cliente, lon_cliente = -19.9386, -43.9341
@@ -675,16 +912,20 @@ def main(page: ft.Page):
             borda_busca = criar_borda_input("#CBD5E1", "#0066FF", 12)
             kwargs_busca = dict(
                 hint_text="O que você precisa hoje?",
-                prefix_icon=ft.Icons.SEARCH, bgcolor="#F1F5F9", filled=True,
-                content_padding=ft.Padding(left=12, right=12, top=12, bottom=12),
-                text_size=14, expand=True,
-                on_change=lambda e: carregar_vitrine(filtro_atual[0], e.control.value)
+                # Lupa posicionada na DIREITA (suffix_icon) para deixar a esquerda livre para digitação
+                suffix_icon=ft.Icons.SEARCH,
+                bgcolor="#F1F5F9",
+                filled=True,
+                content_padding=ft.Padding(left=14, right=12, top=12, bottom=12),
+                text_size=14,
+                expand=True,
+                on_change=lambda e: carregar_vitrine(filtro_atual[0], e.control.value),
+                on_submit=lambda e: carregar_vitrine(filtro_atual[0], e.control.value)
             )
             if borda_busca is not None:
                 kwargs_busca["border"] = borda_busca
             txt_busca = ft.TextField(**kwargs_busca)
 
-            # Cada botão usa expand=True para dividir a largura da tela em 5 partes iguais sem nunca cortar na direita!
             def criar_card_categoria(icone, cor_icone, titulo, sub, acao, destaque_sos=False):
                 return ft.Container(
                     expand=True,
